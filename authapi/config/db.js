@@ -1,0 +1,5 @@
+const{creeateClient}=require('@supabase/supabase-js');
+const supabaseUrl='https://hscnhkbdcdrtpwhsgmfs.supabase.co';
+const supabaseKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzY25oa2JkY2RydHB3aHNnbWZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNDM4ODIsImV4cCI6MjA3NzcxOTg4Mn0.lSyKfhyQiRgxgrZAfupZOcl66NjEHkcMDeOEQ1zOGOk';
+const supabase=creeateclient(supabaseUrl,supabaseKey);
+module.exports=supabase;

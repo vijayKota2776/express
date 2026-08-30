@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat App</title>
+
+  <style>
+    :root {
+      --primary: #e26b4a;
+      --bg: #f7f9fc;
+      --white: #ffffff;
+      --text: #333333;
+      --border: #e2e8f0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-top: 10px;
+      color: var(--primary);
+      font-size: 2.2rem;
+      letter-spacing: 1px;
+    }
+
+    h2 {
+      margin: 10px 0 20px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    #loginbox, #chat-box {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+    }
+
+    #chat-box {
+      display: none;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      outline: none;
+      font-size: 1rem;
+      transition: border 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+
+    button {
+      background: var(--primary);
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background: #357abd;
+    }
+
+    #message-box {
+      background: var(--white);
+      width: 90%;
+      max-width: 500px;
+      min-height: 300px;
+      margin: 20px auto;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow-y: auto;
+    }
+
+    #message-box p {
+      background: #eaf3ff;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      max-width: 85%;
+      word-wrap: break-word;
+    }
+
+    #message-box p:nth-child(even) {
+      background: #f1f5f9;
+      align-self: flex-end;
+    }
+
+    #message-box p.me {
+      background: #d0ebff;
+      align-self: flex-end;
+      text-align: right;
+    }
+
+    #count {
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.8rem; }
+      input[type="text"] { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <h1>💬 Chat App</h1>
+  <h2>Live Users: <span id="count">0</span></h2>
+
+  <div id="message-box"></div>
+
+  <div id="chat-box">
+    <h3>Send a Message</h3>
+    <input type="text" id="message" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <div id="loginbox">
+    <h3>Join the Chat</h3>
+    <input type="text" id="userName" placeholder="Enter your username..." />
+    <button onclick="joinChat()">Join</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    document.getElementById("chat-box").style.display = "none";
+
+    socket.on("user-count", (count) => {
+      document.getElementById("count").innerHTML = count;
+    });
+
+    socket.on("receive-message", (data) => {
+      const p = document.createElement("p");
+      p.innerText = `${data.userName}: ${data.message}`;
+      document.getElementById("message-box").appendChild(p);
+      document.getElementById("message-box").scrollTop = document.getElementById("message-box").scrollHeight;
+    });
+
+    function joinChat() {
+      const userName = document.getElementById("userName").value.trim();
+      if (!userName) {
+        alert("Please enter a username");
+        return;
+      }
+      socket.emit("new-user-joined", userName);
+      document.getElementById("userName").value = "";
+
+      document.getElementById("loginbox").style.display = "none";
+      document.getElementById("chat-box").style.display = "block";
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("message");
+      const message = input.value.trim();
+      if (!message) return;
+
+      const p = document.createElement("p");
+      p.innerText = `Me: ${message}`;
+      p.classList.add("me");
+      document.getElementById("message-box").appendChild(p);
+      document.getElementById("message-box").scrollTop = document.getElementById("message-box").scrollHeight;
+
+      socket.emit("send-message", message);
+      input.value = "";
+      input.focus();
+    }
+  </script>
+</body>
+</html>
